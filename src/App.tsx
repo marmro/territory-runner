@@ -339,15 +339,7 @@ export default function App() {
   }, [query]);
 
   return (
-    <div className="h-screen w-screen overflow-hidden bg-[#f8f9fa] font-sans text-black flex flex-col">
-
-      {/* Under Construction Overlay */}
-      <div className="fixed inset-0 z-[999] backdrop-blur-md bg-white/60 flex flex-col items-center justify-center pointer-events-all">
-        <div className="text-center px-8">
-          <div className="text-6xl mb-6"></div>
-          <h1 className="text-3xl font-black text-black tracking-tight mb-3">Under Construction</h1>
-          <p className="text-sm text-black/50 font-medium">I'm working on it. Check back soon.</p>
-        </div>
+    
       </div>
 
       {/* Admin Controls / Login */}
