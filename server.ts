@@ -1,110 +1,138 @@
 import express from 'express';
 import { createServer as createViteServer } from 'vite';
-import Database from 'better-sqlite3';
+import pg from 'pg';
 
-const PORT = 3000;
+const { Pool } = pg;
+const PORT = process.env.PORT || 8080;
 
-// Initialize SQLite Database
-const db = new Database('territories.sqlite');
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
 
-// Create table
-db.exec(`
-  CREATE TABLE IF NOT EXISTS territories (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    city TEXT NOT NULL,
-    schedule TEXT NOT NULL
-  );
-`);
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'changeme123';
+const adminSessions = new Set<string>();
 
-// Check if table is empty before inserting dummy data
-const count = db.prepare('SELECT COUNT(*) as count FROM territories').get() as { count: number };
+async function initDb() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS territories (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      city TEXT NOT NULL,
+      schedule TEXT NOT NULL
+    );
+  `);
 
-if (count.count === 0) {
-  const insertStmt = db.prepare('INSERT INTO territories (name, city, schedule) VALUES (?, ?, ?)');
-  const dummyData = [
-    ['Western Slope', 'Grand Junction, CO', 'Monday, Thursday'],
-    ['Collegiate Peaks', 'Buena Vista, CO', 'Tuesday, Friday'],
-    ['Clear Creek', 'Idaho Springs, CO', 'Monday, Wednesday, Friday'],
-    ['Royal Gorge', 'Canon City, CO', 'Tuesday, Thursday'],
-    ['Southern Plains', 'Pueblo, CO', 'Tuesday, Thursday'],
-    ['Pikes Peak', 'Colorado Springs, CO', 'Monday, Wednesday, Friday'],
-    ['Lower Arkansas', 'Arkansas Valley, CO', 'Wednesday'],
-    ['Ute Pass', 'Woodland Park, CO', 'Tuesday, Friday'],
-    ['High Plains', 'Greeley, CO', 'Monday, Thursday'],
-    ['Northern Front Range', 'Fort Collins, CO', 'Monday, Wednesday, Friday'],
-    ['Flatirons', 'Boulder, CO', 'Tuesday, Thursday'],
-    ['Twin Peaks', 'Longmont, CO', 'Monday, Wednesday'],
-    ['Gateway', 'DIA, CO', 'Every Day'],
-    ['Northeast Plains', 'Ft. Morgan / Sterling, CO', 'Wednesday'],
-    ['High Plains North', 'Cheyenne, WY', 'Tuesday, Friday'],
-    ['Central Wyoming', 'Casper, WY', 'Wednesday'],
-    ['East Metro', 'Aurora, CO', 'Monday, Wednesday, Friday'],
-    ['West Metro', 'Lakewood/Golden/Arvada, CO', 'Every Day'],
-    ['South Metro', 'Highlands Ranch, CO', 'Tuesday, Thursday'],
-    ['Palmer Divide', 'Lone Tree / Castle Rock, CO', 'Monday, Thursday'],
-    ['City Center', 'Downtown, CO', 'Every Day'],
-    ['Yampa Valley', 'Steamboat Springs, CO', 'Thursday'],
-  ];
+  const { rows } = await pool.query('SELECT COUNT(*) as count FROM territories');
+  if (parseInt(rows[0].count) === 0) {
+    const dummyData = [
+      ['Western Slope', 'Grand Junction, CO', 'Monday, Thursday'],
+      ['Collegiate Peaks', 'Buena Vista, CO', 'Tuesday, Friday'],
+      ['Clear Creek', 'Idaho Springs, CO', 'Monday, Wednesday, Friday'],
+      ['Royal Gorge', 'Canon City, CO', 'Tuesday, Thursday'],
+      ['Southern Plains', 'Pueblo, CO', 'Tuesday, Thursday'],
+      ['Pikes Peak', 'Colorado Springs, CO', 'Monday, Wednesday, Friday'],
+      ['Lower Arkansas', 'Arkansas Valley, CO', 'Wednesday'],
+      ['Ute Pass', 'Woodland Park, CO', 'Tuesday, Friday'],
+      ['High Plains', 'Greeley, CO', 'Monday, Thursday'],
+      ['Northern Front Range', 'Fort Collins, CO', 'Monday, Wednesday, Friday'],
+      ['Flatirons', 'Boulder, CO', 'Tuesday, Thursday'],
+      ['Twin Peaks', 'Longmont, CO', 'Monday, Wednesday'],
+      ['Gateway', 'DIA, CO', 'Every Day'],
+      ['Northeast Plains', 'Ft. Morgan / Sterling, CO', 'Wednesday'],
+      ['High Plains North', 'Cheyenne, WY', 'Tuesday, Friday'],
+      ['Central Wyoming', 'Casper, WY', 'Wednesday'],
+      ['East Metro', 'Aurora, CO', 'Monday, Wednesday, Friday'],
+      ['West Metro', 'Lakewood/Golden/Arvada, CO', 'Every Day'],
+      ['South Metro', 'Highlands Ranch, CO', 'Tuesday, Thursday'],
+      ['Palmer Divide', 'Lone Tree / Castle Rock, CO', 'Monday, Thursday'],
+      ['City Center', 'Downtown, CO', 'Every Day'],
+      ['Yampa Valley', 'Steamboat Springs, CO', 'Thursday'],
+    ];
 
-  dummyData.forEach(row => insertStmt.run(...row));
-  console.log('Database initialized with dummy data.');
-} else {
-  console.log('Database already contains data, skipping initialization.');
+    for (const [name, city, schedule] of dummyData) {
+      await pool.query(
+        'INSERT INTO territories (name, city, schedule) VALUES ($1, $2, $3)',
+        [name, city, schedule]
+      );
+    }
+    console.log('Database seeded with dummy data.');
+  } else {
+    console.log('Database already contains data, skipping seed.');
+  }
 }
 
 async function startServer() {
+  await initDb();
+
   const app = express();
-  
   app.use(express.json());
 
-  // API Routes
-  app.get('/api/search', (req, res) => {
-    const { q } = req.query;
-    if (!q || typeof q !== 'string') {
-      return res.json([]);
+  app.post('/api/admin/login', (req, res) => {
+    const { password } = req.body;
+    if (password === ADMIN_PASSWORD) {
+      const token = Math.random().toString(36).substring(2) + Date.now();
+      adminSessions.add(token);
+      res.json({ success: true, token });
+    } else {
+      res.status(401).json({ error: 'Invalid password' });
     }
-
-    const searchTerm = `%${q}%`;
-    const stmt = db.prepare(`
-      SELECT * FROM territories 
-      WHERE name LIKE ? OR city LIKE ?
-      ORDER BY name ASC
-      LIMIT 20
-    `);
-    
-    const results = stmt.all(searchTerm, searchTerm);
-    res.json(results);
   });
 
-  app.get('/api/territories/all', (req, res) => {
-    const results = db.prepare('SELECT * FROM territories').all();
-    res.json(results);
+  app.post('/api/admin/logout', (req, res) => {
+    const token = req.headers['x-admin-token'] as string;
+    adminSessions.delete(token);
+    res.json({ success: true });
   });
 
-  app.post('/api/territories', (req, res) => {
+  function requireAdmin(req: any, res: any, next: any) {
+    const token = req.headers['x-admin-token'] as string;
+    if (!token || !adminSessions.has(token)) {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+    next();
+  }
+
+  app.get('/api/search', async (req, res) => {
+    const { q } = req.query;
+    if (!q || typeof q !== 'string') return res.json([]);
+    const { rows } = await pool.query(
+      `SELECT * FROM territories WHERE name ILIKE $1 OR city ILIKE $1 ORDER BY name ASC LIMIT 20`,
+      [`%${q}%`]
+    );
+    res.json(rows);
+  });
+
+  app.get('/api/territories/all', async (req, res) => {
+    const { rows } = await pool.query('SELECT * FROM territories ORDER BY name ASC');
+    res.json(rows);
+  });
+
+  app.post('/api/territories', requireAdmin, async (req, res) => {
     const { name, city, schedule } = req.body;
     if (!name || !city || !schedule) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
-
     try {
-      const stmt = db.prepare('INSERT INTO territories (name, city, schedule) VALUES (?, ?, ?)');
-      const info = stmt.run(name, city, schedule);
-      res.json({ id: info.lastInsertRowid, name, city, schedule });
+      const { rows } = await pool.query(
+        'INSERT INTO territories (name, city, schedule) VALUES ($1, $2, $3) RETURNING *',
+        [name, city, schedule]
+      );
+      res.json(rows[0]);
     } catch (error) {
       console.error('Error adding territory:', error);
       res.status(500).json({ error: 'Failed to add territory' });
     }
   });
 
-  app.put('/api/territories/:id', (req, res) => {
+  app.put('/api/territories/:id', requireAdmin, async (req, res) => {
     const { id } = req.params;
     const { name, city, schedule } = req.body;
-    
     try {
-      const stmt = db.prepare('UPDATE territories SET name = ?, city = ?, schedule = ? WHERE id = ?');
-      stmt.run(name, city, schedule, id);
+      await pool.query(
+        'UPDATE territories SET name = $1, city = $2, schedule = $3 WHERE id = $4',
+        [name, city, schedule, id]
+      );
       res.json({ success: true });
     } catch (error) {
       console.error('Error updating territory:', error);
@@ -112,10 +140,10 @@ async function startServer() {
     }
   });
 
-  app.delete('/api/territories/:id', (req, res) => {
+  app.delete('/api/territories/:id', requireAdmin, async (req, res) => {
     const { id } = req.params;
     try {
-      db.prepare('DELETE FROM territories WHERE id = ?').run(id);
+      await pool.query('DELETE FROM territories WHERE id = $1', [id]);
       res.json({ success: true });
     } catch (error) {
       console.error('Error deleting territory:', error);
@@ -123,7 +151,6 @@ async function startServer() {
     }
   });
 
-  // Vite middleware for development
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
       server: { middlewareMode: true },
