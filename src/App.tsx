@@ -340,7 +340,7 @@ export default function App() {
 
   return (
     
-    
+    </div>
 
       {/* Admin Controls / Login */}
       <div className="absolute top-6 right-6 z-10 flex items-center gap-3">
