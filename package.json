@@ -34,6 +34,7 @@
   },
   "devDependencies": {
     "@types/d3-geo": "^3.1.0",
+    "@types/pg": "^8.11.0"
     "@types/express": "^4.17.21",
     "@types/node": "^22.14.0",
     "@types/react-simple-maps": "^3.0.6",
