@@ -131,6 +131,7 @@ export default function App() {
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [isAdding, setIsAdding] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [adminToken, setAdminToken] = useState<string | null>(null);
   const [passcode, setPasscode] = useState('');
   const [showPasscodeModal, setShowPasscodeModal] = useState(false);
   const [passcodeError, setPasscodeError] = useState(false);
@@ -146,13 +147,26 @@ export default function App() {
     googleMapsApiKey: googleMapsApiKey || ''
   });
 
-  const handlePasscodeSubmit = (e: FormEvent) => {
+  const handlePasscodeSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    if (passcode === '6114') {
-      setIsAuthenticated(true);
-      setShowPasscodeModal(false);
-      setPasscodeError(false);
-    } else {
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: passcode })
+      });
+      const data = await res.json();
+      if (data.success && data.token) {
+        setAdminToken(data.token);
+        setIsAuthenticated(true);
+        setShowPasscodeModal(false);
+        setPasscodeError(false);
+      } else {
+        setPasscodeError(true);
+        setPasscode('');
+      }
+    } catch (err) {
+      console.error('Login error:', err);
       setPasscodeError(true);
       setPasscode('');
     }
@@ -193,7 +207,10 @@ export default function App() {
       
       const response = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'x-admin-token': adminToken || ''
+        },
         body: JSON.stringify(newTerritory),
       });
       
@@ -221,7 +238,10 @@ export default function App() {
   const confirmDelete = async () => {
     if (!deleteConfirmId) return;
     try {
-      const res = await fetch(`/api/territories/${deleteConfirmId}`, { method: 'DELETE' });
+      const res = await fetch(`/api/territories/${deleteConfirmId}`, { 
+        method: 'DELETE',
+        headers: { 'x-admin-token': adminToken || '' }
+      });
       if (res.ok) {
         fetchAllTerritories();
         if (query) {
@@ -623,21 +643,23 @@ export default function App() {
                       </div>
                       <div className="text-[11px] font-normal text-black/40 font-mono">{t.schedule}</div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <button 
-                        onClick={() => openEditModal(t)}
-                        className="p-2.5 text-black/20 hover:text-black hover:bg-black/5 rounded-xl transition-all"
-                      >
-                        <User size={16} />
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteTerritory(t.id)}
-                        className="p-2.5 text-black/20 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                        title="Delete Route"
-                      >
-                        <Trash2 size={16} />
-                      </button>
-                    </div>
+                    {isAuthenticated && (
+                      <div className="flex items-center gap-2">
+                        <button 
+                          onClick={() => openEditModal(t)}
+                          className="p-2.5 text-black/20 hover:text-black hover:bg-black/5 rounded-xl transition-all"
+                        >
+                          <User size={16} />
+                        </button>
+                        <button 
+                          onClick={() => handleDeleteTerritory(t.id)}
+                          className="p-2.5 text-black/20 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                          title="Delete Route"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
