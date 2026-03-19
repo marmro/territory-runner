@@ -706,8 +706,8 @@ export default function App() {
                       "input-field text-center text-2xl tracking-[1em] font-bold",
                       passcodeError && "border-red-500 ring-4 ring-red-500/5"
                     )}
-                    placeholder="••••"
-                    maxLength={4}
+                    placeholder="•••••"
+                    maxLength={5}
                     value={passcode}
                     onChange={(e) => {
                       setPasscode(e.target.value);
