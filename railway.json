@@ -5,6 +5,6 @@
     "buildCommand": "npm install && npm run build"
   },
   "deploy": {
-    "startCommand": "node server.ts"
+    "startCommand": "npx tsx server.ts"
   }
 }
