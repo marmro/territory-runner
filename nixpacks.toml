@@ -1,8 +1,103 @@
-[phases.setup]
-nixPkgs = ["nodejs_22"]
-
-[phases.install]
-cmds = ["npm install --prefer-offline=false"]
-
-[phases.build]
-cmds = ["npm run build"]
+    triggerUncaughtException(
+    ^
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'pg' imported from /app/server.ts
+    at packageResolve (node:internal/modules/esm/resolve:838:9)
+    at moduleResolve (node:internal/modules/esm/resolve:907:18)
+    at defaultResolve (node:internal/modules/esm/resolve:1037:11)
+    at nextResolve (node:internal/modules/esm/hooks:748:28)
+    at resolveBase (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895199794:2:3744)
+    at resolveDirectory (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895199794:2:4243)
+    at resolveTsPaths (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895199794:2:4984)
+    at resolve (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895199794:2:5361)
+    at nextResolve (node:internal/modules/esm/hooks:748:28)
+    at Hooks.resolve (node:internal/modules/esm/hooks:240:30) {
+  code: 'ERR_MODULE_NOT_FOUND'
+}
+Node.js v22.11.0
+npm warn config production Use `--omit=dev` instead.
+    at resolveDirectory (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895201104:2:4243)
+    at resolveTsPaths (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895201104:2:4984)
+    at resolve (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895201104:2:5361)
+    at nextResolve (node:internal/modules/esm/hooks:748:28)
+    at Hooks.resolve (node:internal/modules/esm/hooks:240:30) {
+  code: 'ERR_MODULE_NOT_FOUND'
+}
+    ^
+Node.js v22.11.0
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'pg' imported from /app/server.ts
+node:internal/modules/run_main:122
+    triggerUncaughtException(
+    at packageResolve (node:internal/modules/esm/resolve:838:9)
+    at moduleResolve (node:internal/modules/esm/resolve:907:18)
+    at defaultResolve (node:internal/modules/esm/resolve:1037:11)
+    at nextResolve (node:internal/modules/esm/hooks:748:28)
+    at resolveBase (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895201104:2:3744)
+npm warn config production Use `--omit=dev` instead.
+    at defaultResolve (node:internal/modules/esm/resolve:1037:11)
+    at nextResolve (node:internal/modules/esm/hooks:748:28)
+Node.js v22.11.0
+    at resolveBase (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895202361:2:3744)
+node:internal/modules/run_main:122
+    at resolveDirectory (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895202361:2:4243)
+    triggerUncaughtException(
+    at resolveTsPaths (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895202361:2:4984)
+    ^
+    at resolve (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895202361:2:5361)
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'pg' imported from /app/server.ts
+    at nextResolve (node:internal/modules/esm/hooks:748:28)
+    at packageResolve (node:internal/modules/esm/resolve:838:9)
+    at Hooks.resolve (node:internal/modules/esm/hooks:240:30) {
+    at moduleResolve (node:internal/modules/esm/resolve:907:18)
+  code: 'ERR_MODULE_NOT_FOUND'
+}
+npm warn config production Use `--omit=dev` instead.
+Node.js v22.11.0
+    at resolveBase (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895203516:2:3744)
+    at resolveDirectory (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895203516:2:4243)
+    at moduleResolve (node:internal/modules/esm/resolve:907:18)
+    at resolveTsPaths (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895203516:2:4984)
+    at resolve (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895203516:2:5361)
+    at defaultResolve (node:internal/modules/esm/resolve:1037:11)
+    at nextResolve (node:internal/modules/esm/hooks:748:28)
+    at Hooks.resolve (node:internal/modules/esm/hooks:240:30) {
+    triggerUncaughtException(
+node:internal/modules/run_main:122
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'pg' imported from /app/server.ts
+  code: 'ERR_MODULE_NOT_FOUND'
+    ^
+}
+    at packageResolve (node:internal/modules/esm/resolve:838:9)
+    at nextResolve (node:internal/modules/esm/hooks:748:28)
+npm warn config production Use `--omit=dev` instead.
+    at moduleResolve (node:internal/modules/esm/resolve:907:18)
+    at resolveDirectory (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895204855:2:4243)
+    at nextResolve (node:internal/modules/esm/hooks:748:28)
+    at resolveTsPaths (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895204855:2:4984)
+    at resolveBase (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895204855:2:3744)
+node:internal/modules/run_main:122
+    at resolve (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895204855:2:5361)
+    at Hooks.resolve (node:internal/modules/esm/hooks:240:30) {
+    triggerUncaughtException(
+  code: 'ERR_MODULE_NOT_FOUND'
+}
+    ^
+Node.js v22.11.0
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'pg' imported from /app/server.ts
+    at packageResolve (node:internal/modules/esm/resolve:838:9)
+npm warn config production Use `--omit=dev` instead.
+    at defaultResolve (node:internal/modules/esm/resolve:1037:11)
+    at nextResolve (node:internal/modules/esm/hooks:748:28)
+    at resolveBase (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895206170:2:3744)
+    at resolveDirectory (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895206170:2:4243)
+    at resolveTsPaths (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895206170:2:4984)
+    at resolve (file:///app/node_modules/tsx/dist/esm/index.mjs?1773895206170:2:5361)
+    at nextResolve (node:internal/modules/esm/hooks:748:28)
+    at Hooks.resolve (node:internal/modules/esm/hooks:240:30) {
+  code: 'ERR_MODULE_NOT_FOUND'
+}
+node:internal/modules/run_main:122
+Node.js v22.11.0
+    triggerUncaughtException(
+    ^
+    at packageResolve (node:internal/modules/esm/resolve:838:9)
+    at moduleResolve (node:internal/modules/esm/resolve:907:18)
