@@ -371,7 +371,7 @@ export default function App() {
 
       <div className="h-screen w-screen overflow-hidden bg-[#f8f9fa] font-sans text-black flex flex-col">
 
-      {/* Under Construction Overlay */}
+  {/* Under Construction Overlay */}
       <div className="fixed inset-0 z-[999] backdrop-blur-md bg-white/60 flex flex-col items-center justify-center pointer-events-all">
         <div className="text-center px-8">
           <div className="text-6xl mb-6">🚧</div>
